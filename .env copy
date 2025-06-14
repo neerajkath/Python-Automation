@@ -1,0 +1,22 @@
+# Application URL
+BASE_URL=https://www.google.com
+
+# Browser Settings
+BROWSER=chrome
+HEADLESS_MODE=False
+
+# Wait Times (in seconds)
+IMPLICIT_WAIT_TIME=10
+EXPLICIT_WAIT_TIME=20
+
+# Test User Credentials (Example - Replace with actual test users if needed)
+# For production/real credentials, consider more secure methods like secret managers.
+TEST_USERNAME=standard_user
+TEST_PASSWORD=secret_sauce
+
+# Paths (can be relative to the .env file's location, or absolute)
+# In this setup, we'll construct absolute paths in settings.py
+# DRIVER_PATH_ENV=drivers/ # You can define this here if you prefer
+
+# Other settings
+LOG_LEVEL=INFO
