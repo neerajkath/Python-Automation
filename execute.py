@@ -1,6 +1,9 @@
 from utils.utils import *
 from config.settings import *
+from pages import ssoPage, homePage, searchPage
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
+import time
 
 logger = get_logger(__name__)
 
@@ -10,9 +13,16 @@ def main():
         driver = get_driver(BROWSER, HEADLESS_MODE)
         logger.info(f"Successfully initialized {BROWSER} driver (headless: {HEADLESS_MODE}).")
 
+        logger.info(f"Redirecting to {BASE_URL}")
         driver.get(BASE_URL)
 
-        wait_for_visibility_of_element(driver, (By.CLASS_NAME, "lnXdpd"))
+        ssoPage.enterEmail(driver)
+        ssoPage.enterPassword(driver)
+
+        wait_for_visibility_of_element(driver, homePage.sharepointTitle)
+        homePage.enterSearchKeyword(driver)
+
+        searchPage.scrape_all_pages(driver)
         logger.info("Google logo SVG is visible. Task successful.")
 
         return True # Indicate task success

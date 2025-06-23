@@ -67,5 +67,19 @@ def wait_for_visibility_of_element(driver, by_locator, timeout=EXPLICIT_WAIT_TIM
         logger.error(f"Element {by_locator} was not visible after {timeout} seconds. Error: {e}")
         raise # Re-raise the exception if the element doesn't become visible
 
+def wait_for_visibility_of_all_elements(driver, by_locator, timeout=EXPLICIT_WAIT_TIME):
+    """
+    Waits for an element to be visible on the page.
+    Useful for dynamic content or elements that take time to load and appear.
+    """
+    try:
+        element = WebDriverWait(driver, timeout).until(
+            EC.presence_of_all_elements_located(by_locator)
+        )
+        logger.info(f"Elements {by_locator} is visible after waiting.")
+        return element
+    except Exception as e:
+        logger.error(f"Elements {by_locator} was not visible after {timeout} seconds. Error: {e}")
+        raise # Re-raise the exception if the element doesn't become visible
 # Initialize a base logger for the module
 logger = get_logger(__name__)

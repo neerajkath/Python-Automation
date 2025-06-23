@@ -14,6 +14,9 @@ EXPLICIT_WAIT_TIME=20
 TEST_USERNAME=standard_user
 TEST_PASSWORD=secret_sauce
 
+SEARCH_KEYWORD=xyz
+
+
 # Paths (can be relative to the .env file's location, or absolute)
 # In this setup, we'll construct absolute paths in settings.py
 # DRIVER_PATH_ENV=drivers/ # You can define this here if you prefer
