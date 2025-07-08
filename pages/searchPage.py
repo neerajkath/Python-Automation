@@ -9,6 +9,20 @@ logger = get_logger(__name__)
 searchResults = By.XPATH, "/html/body/div[1]/div[2]/div[2]/div/div/div[2]/section/div/div/div[2]/div/div/div/div/div/div[3]/div/div/div[2]/div[3]/div[1]/main/ol/li[1]"
 searchResultsLink = (By.XPATH, "//h2[starts-with(@class, 'heading-')]")
 nextPageButton = By.XPATH, "//button[starts-with(@class, 'button-') and @aria-label='Next page']"
+fileTypeButton = By.XPATH, "//button[@aria-label='Filter by File type']"
+fileTypeButton2 = By.XPATH, "//button[@aria-label='Filtered by File type, 1 filter selected']"
+deSelectAll = By.XPATH, "//button[.//span[text()='Deselect all']]"
+powerPoint = By.XPATH, "//span[@title='PowerPoint']"
+word = By.XPATH, "//span[@title='Word']"
+excel = By.XPATH, "//span[@title='Excel']"
+oneNote = By.XPATH, "//span[@title='OneNote']"
+loop = By.XPATH, "//span[@title='Loop']"
+pdf = By.XPATH, "//span[@title='PDF']"
+photo = By.XPATH, "//span[@title='Photo']"
+video = By.XPATH, "//span[@title='Video']"
+webPage = By.XPATH, "//span[@title='Web Page']"
+other = By.XPATH, "//span[@title='Other']"
+applyButton = By.XPATH, "//span[text()='Apply']"
 
 def waitForPageToLoad(driver: WebDriver):
     try:
@@ -16,10 +30,10 @@ def waitForPageToLoad(driver: WebDriver):
     except:
         logger.error("Could not wait till page load")
 
-def getAllResultsOnPage(driver: WebDriver):
+def getAllResultsOnPage(driver: WebDriver, type: str):
     try:
         hrefs = []
-        with open("./results/search_results.txt", "a") as f:
+        with open(f"./results/{type}_search_results.txt", "a") as f:
             results = wait_for_visibility_of_all_elements(driver, searchResultsLink)
             for item in results:
                 try:
@@ -33,12 +47,11 @@ def getAllResultsOnPage(driver: WebDriver):
     except:
         logger.error("could not save the results to file")
 
-def scrape_all_pages(driver: WebDriver):
+def scrape_all_pages(driver: WebDriver, type: str):
     page = 1
-    open("./results/search_results.txt", "w").close()
-    while True:
+    while True and page < 2:
         logger.info(f"Scraping page {page}...")
-        getAllResultsOnPage(driver)
+        getAllResultsOnPage(driver, type)
 
         try:
             button = wait_for_visibility_of_element(driver, nextPageButton)
@@ -52,3 +65,55 @@ def scrape_all_pages(driver: WebDriver):
         except:
             logger.info("No more pages to scrape.")
             break
+
+def scrapeAllPagesByFileType(driver: WebDriver):
+    # types = ["powerpoint", "word", "excel", "onenote", "loop", "pdf", "photo", "video", "webpage", "other"]
+    types = ["excel"]
+
+    typeButtonMapping = {
+        "powerpoint": powerPoint,
+        "word": word,
+        "excel": excel,
+        "onenote": oneNote,
+        "loop": loop,
+        "pdf": pdf,
+        "photo": photo,
+        "video": video,
+        "webpage": webPage,
+        "other": other,
+    }
+
+
+    for type in types:
+        # Clear the file
+        open(f"./results/{type}_search_results.txt", "w").close()
+        
+        # Get the locator from the mapping
+        locator = typeButtonMapping.get(type)
+        if locator:
+            try:
+                filter_button = wait_for_visibility_of_element(driver, fileTypeButton)
+            except:
+                filter_button = wait_for_visibility_of_element(driver, fileTypeButton2)            
+            filter_button.click()
+            
+            button = wait_for_visibility_of_element(driver, locator)
+            button.click()
+
+            apply = wait_for_visibility_of_element(driver, applyButton)
+            apply.click()
+
+            time.sleep(5)
+            scrape_all_pages(driver, type)
+
+            try:
+                filter_button = wait_for_visibility_of_element(driver, fileTypeButton)
+            except:
+                filter_button = wait_for_visibility_of_element(driver, fileTypeButton2)            
+            filter_button.click()
+            
+            button = wait_for_visibility_of_element(driver, locator)
+            button.click()
+
+            apply = wait_for_visibility_of_element(driver, applyButton)
+            apply.click()
