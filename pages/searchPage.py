@@ -10,6 +10,7 @@ searchResults = By.XPATH, "/html/body/div[1]/div[2]/div[2]/div/div/div[2]/sectio
 searchResultsLink = (By.XPATH, "//h2[starts-with(@class, 'heading-')]")
 nextPageButton = By.XPATH, "//button[starts-with(@class, 'button-') and @aria-label='Next page']"
 fileTypeButton = By.XPATH, "//button[@aria-label='Filter by File type']"
+fileTypeButton2 = By.XPATH, "//button[@aria-label='Filtered by File type, 1 filter selected']"
 deSelectAll = By.XPATH, "//button[.//span[text()='Deselect all']]"
 powerPoint = By.XPATH, "//span[@title='PowerPoint']"
 word = By.XPATH, "//span[@title='Word']"
@@ -48,7 +49,7 @@ def getAllResultsOnPage(driver: WebDriver, type: str):
 
 def scrape_all_pages(driver: WebDriver, type: str):
     page = 1
-    while True:
+    while True and page < 2:
         logger.info(f"Scraping page {page}...")
         getAllResultsOnPage(driver, type)
 
@@ -66,7 +67,8 @@ def scrape_all_pages(driver: WebDriver, type: str):
             break
 
 def scrapeAllPagesByFileType(driver: WebDriver):
-    types = ["powerpoint", "word", "excel", "onenote", "loop", "pdf", "photo", "video", "webpage", "other"]
+    # types = ["powerpoint", "word", "excel", "onenote", "loop", "pdf", "photo", "video", "webpage", "other"]
+    types = ["excel"]
 
     typeButtonMapping = {
         "powerpoint": powerPoint,
@@ -89,11 +91,11 @@ def scrapeAllPagesByFileType(driver: WebDriver):
         # Get the locator from the mapping
         locator = typeButtonMapping.get(type)
         if locator:
-            filter_button = wait_for_visibility_of_element(driver, fileTypeButton)
+            try:
+                filter_button = wait_for_visibility_of_element(driver, fileTypeButton)
+            except:
+                filter_button = wait_for_visibility_of_element(driver, fileTypeButton2)            
             filter_button.click()
-
-            deselect_button = wait_for_visibility_of_element(driver, deSelectAll)
-            deselect_button.click()
             
             button = wait_for_visibility_of_element(driver, locator)
             button.click()
@@ -103,3 +105,15 @@ def scrapeAllPagesByFileType(driver: WebDriver):
 
             time.sleep(5)
             scrape_all_pages(driver, type)
+
+            try:
+                filter_button = wait_for_visibility_of_element(driver, fileTypeButton)
+            except:
+                filter_button = wait_for_visibility_of_element(driver, fileTypeButton2)            
+            filter_button.click()
+            
+            button = wait_for_visibility_of_element(driver, locator)
+            button.click()
+
+            apply = wait_for_visibility_of_element(driver, applyButton)
+            apply.click()

@@ -26,6 +26,8 @@ def main():
         searchPage.scrapeAllPagesByFileType(driver)
         logger.info("We have successfully collected all the links")
 
+        scanForSensitiveTermsInFiles(driver)
+
         return True # Indicate task success
 
     except Exception as e:
@@ -46,7 +48,7 @@ def scanForSensitiveTermsInFiles(driver: WebDriver):
         if not filename.endswith("_search_results.txt"):
             continue  # Skip irrelevant files
 
-        print(f"\nProcessing file: {filename}")
+        logger.info(f"\nProcessing file: {filename}")
         with open(filepath, "r") as f:
             links = [line.strip() for line in f if line.strip()]
 
