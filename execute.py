@@ -1,11 +1,12 @@
 from utils.utils import *
 from config.settings import *
-from pages import ssoPage, homePage, searchPage
+from pages import ssoPage, homePage, searchPage, excel
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
-import time
+from selenium.webdriver.chrome.webdriver import WebDriver
 
 logger = get_logger(__name__)
+results_folder = "./results"
 
 def main():
     logger.info("Starting Selenium automation task to find keywords in shared files")
@@ -22,8 +23,10 @@ def main():
         wait_for_visibility_of_element(driver, homePage.sharepointTitle)
         homePage.enterSearchKeyword(driver)
 
-        searchPage.scrape_all_pages(driver)
-        logger.info("Google logo SVG is visible. Task successful.")
+        searchPage.scrapeAllPagesByFileType(driver)
+        logger.info("We have successfully collected all the links")
+
+        scanForSensitiveTermsInFiles(driver)
 
         return True # Indicate task success
 
@@ -37,6 +40,43 @@ def main():
             driver.quit()
         else:
             logger.warning("Driver was not initialized, skipping quit.")
+
+def scanForSensitiveTermsInFiles(driver: WebDriver):
+    for filename in os.listdir(results_folder):
+        filepath = os.path.join(results_folder, filename)
+
+        if not filename.endswith("_search_results.txt"):
+            continue  # Skip irrelevant files
+
+        logger.info(f"\nProcessing file: {filename}")
+        with open(filepath, "r") as f:
+            links = [line.strip() for line in f if line.strip()]
+
+        # Decide logic based on file type
+        match filename:
+            case f if "excel" in f:
+                for link in links:
+                    driver.execute_script("window.open('');")
+                    windows = driver.window_handles
+                    driver.switch_to.window(windows[-1])
+                    driver.get(link)
+                    excel.checkForRedFlagTerms(driver)
+            # case f if "word" in f:
+            #     for link in links:
+            #         print(f"[WORD] -> {link}")
+            #         # call word scanner
+            # case f if "powerpoint" in f:
+            #     for link in links:
+            #         print(f"[PPT] -> {link}")
+            #         # call ppt scanner
+            # case f if "photo" in f or "image" in f:
+            #     for link in links:
+            #         print(f"[Image] -> {link}")
+            #         # maybe OCR scanner
+            # case _:
+            #     for link in links:
+            #         print(f"[Generic] -> {link}")
+            #         # generic scan
 
 if __name__ == "__main__":
     main()
